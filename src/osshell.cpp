@@ -48,6 +48,33 @@ int main (int argc, char **argv)
     //   If yes, execute it
     //   If no, print error statement: "<command_name>: Error command not found" (do include newline)
 
+    char *exit = "exit"; //variable holds string exit
+    char *history = "history"; //variable holds string history
+    int i = 0;
+
+    std::string filename;
+    filename = "/bin";
+
+
+    while(true){
+        printf("osshell> ");
+        std::cin >> command_list[i];
+        
+        if(strcmp(command_list[i], exit) == 0){
+            printf("quit"); //change to exit program
+        }else if(command_list[i] == history){ //make sure == works
+            //print out the history of commands
+        }else{
+            if(command_list[i]){
+
+            }else{
+                std::cout << command_list[i] << ": Error command not found" << std::endl;
+            }
+        }
+
+        i++;
+    }
+
     // Free allocated memory
     freeArrayOfCharArrays(os_path_list, 16);
     freeArrayOfCharArrays(command_list, 32);
