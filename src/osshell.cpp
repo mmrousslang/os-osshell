@@ -5,6 +5,7 @@
 #include <sstream>
 #include <vector>
 #include <unistd.h>
+#include <sys/stat.h>
 
 void allocateArrayOfCharArrays(char ***array_ptr, size_t array_length, size_t item_size);
 void freeArrayOfCharArrays(char **array, size_t array_length);
@@ -19,15 +20,16 @@ int main (int argc, char **argv)
     allocateArrayOfCharArrays(&os_path_list, 16, 64);
     char* os_path = getenv("PATH");
     splitString(os_path, ':', os_path_list);
-
+    struct stat buf;
 
     // Example code for how to loop over NULL terminated list of strings
-    int i = 0;
-    while (os_path_list[i] != NULL)
-    {
-        printf("PATH[%2d]: %s\n", i, os_path_list[i]);
-        i++;
-    }
+    // int i = 0;
+    
+    // while (os_path_list[i] != NULL)
+    // {
+    //     printf("PATH[%2d]: %s\n", i, os_path_list[i]);
+    //     i++;
+    // }
 
 
     // Welcome message
@@ -54,6 +56,7 @@ int main (int argc, char **argv)
 
     std::string filename;
     filename = "/bin";
+    
 
 
     while(true){
@@ -61,13 +64,30 @@ int main (int argc, char **argv)
         std::cin >> command_list[i];
         
         if(strcmp(command_list[i], exit) == 0){
-            printf("quit"); //change to exit program
-        }else if(command_list[i] == history){ //make sure == works
-            //print out the history of commands
-        }else{
-            if(command_list[i]){
+            break; //exits program
+        }else if(strcmp(command_list[i], history) == 0){ 
+            printf("history requested\n"); 
+            for(int k = 0; k < i; k++){
+                std::cout << k+1 << ": " << command_list[k] << std::endl;
+            }
+            //need to make it print out the history of commands
+        }else{ //search for executable
+            int j = 0;
+            bool commandFound = false;
+            while(os_path_list[j] != NULL){
+                std::string pathString = os_path_list[j];
+                pathString.append("/");
+                pathString.append(command_list[i]);
 
-            }else{
+                if(stat(pathString.c_str(), &buf) == 0 && buf.st_mode & S_IXUSR){
+                    //executable found, now need to exit this inner while loop and then execute command with thread
+                    commandFound = true;
+                    std::cout << "TRUE\n";
+                }
+                j++;
+            }
+
+            if(!commandFound){ //user entered a command that was not found
                 std::cout << command_list[i] << ": Error command not found" << std::endl;
             }
         }
