@@ -11,45 +11,26 @@
 void splitString(std::string text, char d, std::vector<std::string>& result);
 void vectorOfStringsToArrayOfCharArrays(std::vector<std::string>& list, char ***result);
 void freeArrayOfCharArrays(char **array, size_t array_length);
+int allNums(std::string checkString);
 
 int main (int argc, char **argv)
 {
-    // Get list of paths to binary executables
     std::vector<std::string> os_path_list;
     char* os_path = getenv("PATH");
     splitString(os_path, ':', os_path_list);
     struct stat buf;
-
-    // Example code for how to loop over NULL terminated list of strings
-    // int z;
-    // for (z = 0; i < os_path_list.size(); z++)
-    // {
-    //     printf("PATH[%2d]: %s\n", z, os_path_list[z].c_str());
-    // }
+    std::vector<std::string> command_list; //to store command user types in, split into its various parameters
+    char **command_list_exec; // commannd list converted to an array of character arrays
+    char *exit = "exit"; //variable holds string exit
+    char *history = "history"; //variable holds string history
+    char slash = '/';
+    char dot = '.';
+    std::string command;
+    int i = 0;
 
     // Welcome message
     printf("Welcome to OSShell! Please enter your commands ('exit' to quit).\n");
-
-    std::vector<std::string> command_list; //to store command user types in, split into its various parameters
-    char **command_list_exec; // commannd list converted to an array of character arrays
-
-    // Repeat:
-    //  Print prompt for user input: "osshell> " (no newline)
-    //  Get user input for next command
-    //  If command is `exit` exit loop / quit program
-    //  If command is `history` print previous N commands
-    //  For all other commands, check if an executable by that name is in one of the PATH directories
-    //   If yes, execute it
-    //   If no, print error statement: "<command_name>: Error command not found" (do include newline)
-
-    char *exit = "exit"; //variable holds string exit
-    char *history = "history"; //variable holds string history
-    int i = 0;
-
-    std::string command;
     
-//get full command and then split it using string split
-
     while(true){
         printf("osshell> ");
         std::getline(std::cin, command); //putting user input into string commmand
@@ -59,24 +40,38 @@ int main (int argc, char **argv)
         
         if(strcmp(command_list_exec[0], exit) == 0){
             break; //exits program
-        }else if(strcmp(command_list_exec[0], history) == 0){ 
-            for(int k = 0; k < i; k++){
-                //std::cout << k+1 << ": " << hisory_list[k] << std::endl;
-                //need to make it print out the history of commands
-                std::cout << "HISTORY ...\n";
+        }else if(strcmp(command_list_exec[0], history) == 0){  //HISTORY STUFF
+            if(command_list_exec[1] != NULL){
+                if(strcmp(command_list_exec[1], "clear") == 0){
+                    std::cout << "clear history\n";
+                }else if(allNums(command_list_exec[1]) > 0){
+                    std::cout << "num > 0\n";
+                }else {
+                    std::cout << "Error: history expects an integer > 0 (or 'clear')\n";
+                }
+            } else {
+                std::cout << "HISTORY\n";
             }
+        }else if(command_list_exec[0][0] == dot || command_list_exec[0][0] == slash){
+            if(stat(command.c_str(), &buf) == 0 && buf.st_mode & S_IXUSR){
+                //executable found
+                int pid = fork();
+                //child process
+                if(pid == 0){
+                    //run executable
+                    execv(command.c_str(), command_list_exec);
+                } else {
+                    int status;
+                    waitpid(pid, &status, 0);
+                }
+            }else { //not a valid path provided by the user
+                std::cout << command << ": Error command not found" << std::endl;
+            }       
         }else{ //search for executable
             int j = 0;
             bool commandFound = false;
 
             for(j = 0; j < os_path_list.size(); j++) {
-
-                // std::string pathStringToSplit = os_path_list[j];
-                // pathStringToSplit.append("/");
-                // pathStringToSplit.append(userCommandFull);
-
-                // std::cout << "spot 2\n";
-
                 std::string pathString = os_path_list[j];
                 pathString.append("/");
                 pathString.append(command_list_exec[0]);
@@ -92,11 +87,9 @@ int main (int argc, char **argv)
                         execv(pathString.c_str(), command_list_exec);
                     } else {
                         int status;
-
                         waitpid(pid, &status, 0);
                     }
-                    break;
-                    
+                    break; 
                 }
             }
 
@@ -104,41 +97,8 @@ int main (int argc, char **argv)
                 std::cout << command << ": Error command not found" << std::endl;
             }
         }
-
         i++;
     }
-
-    // //Example code - shows how to split a command and prepare for the execv() function
-    // std::string example_command = "ls -lh";
-    // splitString(example_command, ' ', command_list);
-    // vectorOfStringsToArrayOfCharArrays(command_list, &command_list_exec);
-    // // use command_list_exec in the execv function rather than looping and printing
-    // i = 0;
-    // while (command_list_exec[i] != NULL)
-    // {
-    //     printf("CMD[%2d]: %s\n", i, command_list_exec[i]);
-    //     i++;
-    // }
-
-    // // free memory for 'command_list_exec'
-    // freeArrayOfCharArrays(command_list_exec, command_list.size() + 1);
-    // printf("-------\n");
-
-    // // Second example command - reuse the 'command_list' and 'command_list_exec'
-    // example_command = "echo \"Hello world\" I am alive!";
-    // splitString(example_command, ' ', command_list);
-    // vectorOfStringsToArrayOfCharArrays(command_list, &command_list_exec);
-    // // use 'command_list_exec' in the execv() function rather than looping and printing
-    // i = 0;
-    // while (command_list_exec[i] != NULL)
-    // {
-    //     printf("CMD[%2d]: %s\n", i, command_list_exec[i]);
-    //     i++;
-    // }
-
-    // // free memory for 'command_list_exec'
-    // freeArrayOfCharArrays(command_list_exec, command_list.size() + 1);
-    // printf("-------\n");
     return 0;
 }
 
@@ -235,4 +195,17 @@ void freeArrayOfCharArrays(char **array, size_t array_length)
         }
     }
     delete[] array;
+}
+
+/*
+    checkString: text to check if it is all numbers
+    returns the string as an int if checkString is an int and 0 if it is not
+*/
+int allNums(std::string checkString){
+    for(int i = 0; i < checkString.length(); i++){
+        if(isdigit(checkString[i]) == false){
+            return 0;
+        }
+    }
+    return atoi(checkString.c_str());
 }
