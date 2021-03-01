@@ -27,22 +27,25 @@ int main (int argc, char **argv)
     char slash = '/';
     char dot = '.';
     std::string command;
-    int i = 0;
+    int i = 0; //counter variable
 
     // Welcome message
     printf("Welcome to OSShell! Please enter your commands ('exit' to quit).\n");
     
     while(true){
         printf("osshell> ");
-        std::getline(std::cin, command); //putting user input into string commmand
-        splitString(command, ' ', command_list); //splitting command on the space character
 
+        //ISSUE: segmentation fault (core dumped) here if only a space or enter is put in. It won't store it
+        std::getline(std::cin, command); //putting user input into string commmand
+
+        splitString(command, ' ', command_list); //splitting command on the space character
         vectorOfStringsToArrayOfCharArrays(command_list, &command_list_exec);
         
         if(strcmp(command_list_exec[0], exit) == 0){ //user enters the command 'exit', quit the program
             break; 
-        }else if(strcmp(command_list_exec[0], enter) == 0){ //user just hits enter with no command, do nothing
-            //do nothing, just reprompt for command
+        }else if(strcmp(command_list_exec[0], "\n") == 0){ //user just hits enter with no command, do nothing
+            printf("Hello");
+            i = i - 1; //makes sure that the counter doesn't increment, we don't want to count enter as a command 
         }else if(strcmp(command_list_exec[0], history) == 0){ //user enters 'history', print command history
             if(command_list_exec[1] != NULL){
                 if(strcmp(command_list_exec[1], "clear") == 0){
@@ -100,7 +103,7 @@ int main (int argc, char **argv)
                 std::cout << command << ": Error command not found" << std::endl;
             }
         }
-        i++;
+        i++; //increment counter
     }
     return 0;
 }
