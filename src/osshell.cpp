@@ -34,10 +34,9 @@ int main (int argc, char **argv)
     while(true){
         printf("osshell> ");
 
-        //ISSUE: segmentation fault (core dumped) here if only a space or enter is put in. It won't store it
         std::getline(std::cin, command); //putting user input into string commmand
 
-        if(command == "\n"){ //check if only enter was submitted for command
+        if(command[0] == NULL || command[0] == ' '){ //check if only enter or space was submitted for command
             //do nothing
         }else{ //other commands besides only enter
 
