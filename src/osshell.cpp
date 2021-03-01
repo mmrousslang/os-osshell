@@ -20,9 +20,10 @@ int main (int argc, char **argv)
     splitString(os_path, ':', os_path_list);
     struct stat buf;
     std::vector<std::string> command_list; //to store command user types in, split into its various parameters
-    char **command_list_exec; // commannd list converted to an array of character arrays
+    char **command_list_exec; // command list converted to an array of character arrays
     char *exit = "exit"; //variable holds string exit
     char *history = "history"; //variable holds string history
+    char *enter = "\n"; //variable holds string for enter
     char slash = '/';
     char dot = '.';
     std::string command;
@@ -34,13 +35,15 @@ int main (int argc, char **argv)
     while(true){
         printf("osshell> ");
         std::getline(std::cin, command); //putting user input into string commmand
-        splitString(command, ' ', command_list); //splitting command on the space char
+        splitString(command, ' ', command_list); //splitting command on the space character
 
         vectorOfStringsToArrayOfCharArrays(command_list, &command_list_exec);
         
-        if(strcmp(command_list_exec[0], exit) == 0){
-            break; //exits program
-        }else if(strcmp(command_list_exec[0], history) == 0){  //HISTORY STUFF
+        if(strcmp(command_list_exec[0], exit) == 0){ //user enters the command 'exit', quit the program
+            break; 
+        }else if(strcmp(command_list_exec[0], enter) == 0){ //user just hits enter with no command, do nothing
+            //do nothing, just reprompt for command
+        }else if(strcmp(command_list_exec[0], history) == 0){ //user enters 'history', print command history
             if(command_list_exec[1] != NULL){
                 if(strcmp(command_list_exec[1], "clear") == 0){
                     std::cout << "clear history\n";
@@ -52,7 +55,7 @@ int main (int argc, char **argv)
             } else {
                 std::cout << "HISTORY\n";
             }
-        }else if(command_list_exec[0][0] == dot || command_list_exec[0][0] == slash){
+        }else if(command_list_exec[0][0] == dot || command_list_exec[0][0] == slash){//user inputs . or / check if command is a path
             if(stat(command.c_str(), &buf) == 0 && buf.st_mode & S_IXUSR){
                 //executable found
                 int pid = fork();
