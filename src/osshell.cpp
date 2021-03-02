@@ -21,16 +21,15 @@ int main (int argc, char **argv)
     struct stat buf;
     std::vector<std::string> command_list; //to store command user types in, split into its various parameters
     char **command_list_exec; // command list converted to an array of character arrays
-    char *exit = "exit"; //variable holds string exit
-    char *history = "history"; //variable holds string history
+    std::vector<std::string> history; //to story history of commands in
+
     char slash = '/';
     char dot = '.';
     std::string command;
-    int i = 0; //counter variable
 
     // Welcome message
     printf("Welcome to OSShell! Please enter your commands ('exit' to quit).\n");
-    
+
     while(true){
         printf("osshell> ");
 
@@ -39,25 +38,41 @@ int main (int argc, char **argv)
         if(command[0] == NULL || command[0] == ' '){ //check if only enter or space was submitted for command
             //do nothing
         }else{ //other commands besides only enter
+            //vectorOfStringsToArrayOfCharArrays(history, &history_list);
 
             splitString(command, ' ', command_list); //splitting command on the space character
             vectorOfStringsToArrayOfCharArrays(command_list, &command_list_exec);
             
-            if(strcmp(command_list_exec[0], exit) == 0){ //user enters the command 'exit', quit the program
-                break; 
-            }else if(strcmp(command_list_exec[0], history) == 0){ //user enters 'history', print command history
-                if(command_list_exec[1] != NULL){
+            
+            if(strcmp(command_list_exec[0], "exit") == 0){ //user enters the command 'exit', quit the program
+              
+               break; 
+
+            }else if(strcmp(command_list_exec[0], "history") == 0){ //user enters 'history', print command history
+               
+                if(command_list_exec[1] == NULL){
+
+                    for(int i = 0; i < history.size(); i++){ 
+                        std::cout << "   " << i+1 <<": " <<history.at(i) << "\n";
+                    }  
+
+                }else{
+
                     if(strcmp(command_list_exec[1], "clear") == 0){
-                        std::cout << "clear history\n";
+                       
+                        history.clear();
+
                     }else if(allNums(command_list_exec[1]) > 0){
                         std::cout << "num > 0\n";
                     }else {
                         std::cout << "Error: history expects an integer > 0 (or 'clear')\n";
                     }
-                } else {
-                    std::cout << "HISTORY\n";
-                }
+                } 
+
+                history.push_back(command);  
+
             }else if(command_list_exec[0][0] == dot || command_list_exec[0][0] == slash){//user inputs . or / check if command is a path
+               
                 if(stat(command.c_str(), &buf) == 0 && buf.st_mode & S_IXUSR){
                     //executable found
                     int pid = fork();
@@ -75,6 +90,7 @@ int main (int argc, char **argv)
             }else{ //search for executable
                 int j = 0;
                 bool commandFound = false;
+                history.push_back(command);
 
                 for(j = 0; j < os_path_list.size(); j++) {
                     std::string pathString = os_path_list[j];
@@ -102,10 +118,8 @@ int main (int argc, char **argv)
                     std::cout << command << ": Error command not found" << std::endl;
                 }
             }
-            i++; //increment counter
 
         }
-        
     }
     return 0;
 }
