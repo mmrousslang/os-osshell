@@ -22,7 +22,6 @@ int main (int argc, char **argv)
     std::vector<std::string> command_list; //to store command user types in, split into its various parameters
     char **command_list_exec; // command list converted to an array of character arrays
     std::vector<std::string> history; //to store history of commands in
-
     char slash = '/';
     char dot = '.';
     std::string command;
@@ -35,13 +34,11 @@ int main (int argc, char **argv)
 
         std::getline(std::cin, command); //putting user input into string commmand
 
-        if(command[0] == NULL || command[0] == ' '){ //check if only enter or space was submitted for command
-            //do nothing
-        }else{ //other commands besides only enter
+        if(command[0] == NULL || command[0] == ' '){ //check if only enter or space was submitted for command, do nothing
 
+        }else{ //other commands besides only enter
             splitString(command, ' ', command_list); //splitting command on the space character
             vectorOfStringsToArrayOfCharArrays(command_list, &command_list_exec);
-            
             
             if(strcmp(command_list_exec[0], "exit") == 0){ //user enters the command 'exit', quit the program
               
@@ -54,11 +51,11 @@ int main (int argc, char **argv)
                     for(int i = 0; i < history.size(); i++){ 
                         std::cout << "   " << i+1 <<": " <<history.at(i) << "\n";
                     }  
-                    history.push_back(command); 
+                    history.push_back(command); //push history to list
 
                 }else if(strcmp(command_list_exec[1], "clear") == 0){ //if command is history clear, clear the list
                     
-                    history.clear();
+                    history.clear(); //push history to list
 
                 }else if(allNums(command_list_exec[1]) > 0){ //check if number after "history is greater than 0"
 
@@ -66,16 +63,16 @@ int main (int argc, char **argv)
                         std::cout << "   " << i+1 <<": " <<history.at(i) << "\n";
                     } 
 
-                    history.push_back(command); 
+                    history.push_back(command); //push history to list
 
                 }else{ //all else prints the error
+                    history.push_back(command); //push history to list
                     std::cout << "Error: history expects an integer > 0 (or 'clear')\n";
-                    history.push_back(command); 
                 } 
 
             }else if(command_list_exec[0][0] == dot || command_list_exec[0][0] == slash){//user inputs . or / check if command is a path
                 history.push_back(command);
-                
+
                 if(stat(command.c_str(), &buf) == 0 && buf.st_mode & S_IXUSR){
                     //executable found
                     int pid = fork();
