@@ -58,10 +58,12 @@ int main (int argc, char **argv)
                     history.clear(); //push history to list
 
                 }else if(allNums(command_list_exec[1]) > 0){ //check if number after "history is greater than 0"
+           
+                    int spot = history.size() - allNums(command_list_exec[1]); //finds starting spot in list
 
-                    for(int i = 0; i < allNums(command_list_exec[1]); i++){ 
+                    for(int i = spot; i < history.size(); i++){ 
                         std::cout << "   " << i+1 <<": " <<history.at(i) << "\n";
-                    } 
+                    }
 
                     history.push_back(command); //push history to list
 
@@ -115,7 +117,6 @@ int main (int argc, char **argv)
                 }
 
                 if(!commandFound){ //user entered a command that was not found
-                    history.push_back(command);
                     std::cout << command << ": Error command not found" << std::endl;
                 }
             }
