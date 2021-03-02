@@ -21,7 +21,7 @@ int main (int argc, char **argv)
     struct stat buf;
     std::vector<std::string> command_list; //to store command user types in, split into its various parameters
     char **command_list_exec; // command list converted to an array of character arrays
-    std::vector<std::string> history; //to story history of commands in
+    std::vector<std::string> history; //to store history of commands in
 
     char slash = '/';
     char dot = '.';
@@ -50,26 +50,30 @@ int main (int argc, char **argv)
 
             }else if(strcmp(command_list_exec[0], "history") == 0){ //user enters 'history', print command history
                
-                if(command_list_exec[1] == NULL){
+                if(command_list_exec[1] == NULL){ //if nothing after "history", just print history list
 
                     for(int i = 0; i < history.size(); i++){ 
                         std::cout << "   " << i+1 <<": " <<history.at(i) << "\n";
                     }  
+                    history.push_back(command); 
 
-                }else{
+                }else if(strcmp(command_list_exec[1], "clear") == 0){ //if command is history clear, clear the list
+                    
+                    history.clear();
 
-                    if(strcmp(command_list_exec[1], "clear") == 0){
-                       
-                        history.clear();
+                }else if(allNums(command_list_exec[1]) > 0){ //check if number after "history is greater than 0"
 
-                    }else if(allNums(command_list_exec[1]) > 0){
-                        std::cout << "num > 0\n";
-                    }else {
-                        std::cout << "Error: history expects an integer > 0 (or 'clear')\n";
-                    }
+                    /*
+                    for(int i = 0; i < command_list_exec[1]; i++){ 
+                        std::cout << "   " << i+1 <<": " <<history.at(i) << "\n";
+                    } 
+                    */
+                    history.push_back(command); 
+
+                }else{ //all else prints the error
+                    std::cout << "Error: history expects an integer > 0 (or 'clear')\n";
+                    history.push_back(command); 
                 } 
-
-                history.push_back(command);  
 
             }else if(command_list_exec[0][0] == dot || command_list_exec[0][0] == slash){//user inputs . or / check if command is a path
                
