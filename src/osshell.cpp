@@ -38,7 +38,6 @@ int main (int argc, char **argv)
         if(command[0] == NULL || command[0] == ' '){ //check if only enter or space was submitted for command
             //do nothing
         }else{ //other commands besides only enter
-            //vectorOfStringsToArrayOfCharArrays(history, &history_list);
 
             splitString(command, ' ', command_list); //splitting command on the space character
             vectorOfStringsToArrayOfCharArrays(command_list, &command_list_exec);
@@ -63,11 +62,10 @@ int main (int argc, char **argv)
 
                 }else if(allNums(command_list_exec[1]) > 0){ //check if number after "history is greater than 0"
 
-                    /*
-                    for(int i = 0; i < command_list_exec[1]; i++){ 
+                    for(int i = 0; i < allNums(command_list_exec[1]); i++){ 
                         std::cout << "   " << i+1 <<": " <<history.at(i) << "\n";
                     } 
-                    */
+
                     history.push_back(command); 
 
                 }else{ //all else prints the error
@@ -76,7 +74,8 @@ int main (int argc, char **argv)
                 } 
 
             }else if(command_list_exec[0][0] == dot || command_list_exec[0][0] == slash){//user inputs . or / check if command is a path
-               
+                history.push_back(command);
+                
                 if(stat(command.c_str(), &buf) == 0 && buf.st_mode & S_IXUSR){
                     //executable found
                     int pid = fork();
@@ -119,6 +118,7 @@ int main (int argc, char **argv)
                 }
 
                 if(!commandFound){ //user entered a command that was not found
+                    history.push_back(command);
                     std::cout << command << ": Error command not found" << std::endl;
                 }
             }
