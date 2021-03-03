@@ -75,9 +75,14 @@ int main (int argc, char **argv)
                     
                     history.clear(); //push history to list
 
-                }else if(allNums(command_list_exec[1]) > 0 && allNums(command_list_exec[1]) <= history.size()){ //check if number after "history is greater than 0"
-           
+                }else if(allNums(command_list_exec[1]) > 0){ //check if number after "history is greater than 0"
                     int spot = history.size() - allNums(command_list_exec[1]); //finds starting spot in list
+                    int numberEntered = allNums(command_list_exec[1]);
+
+                    //if number is greater than history size, just print everything out
+                    if (numberEntered > history.size()){ 
+                        spot = 0;
+                    }
 
                     for(int i = spot; i < history.size(); i++){ 
                         std::cout << "  " << i+1 <<": " <<history.at(i) << "\n";
