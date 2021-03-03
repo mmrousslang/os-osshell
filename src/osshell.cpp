@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <fstream>
 
 void splitString(std::string text, char d, std::vector<std::string>& result);
 void vectorOfStringsToArrayOfCharArrays(std::vector<std::string>& list, char ***result);
@@ -26,6 +27,13 @@ int main (int argc, char **argv)
     char dot = '.';
     std::string command;
 
+    //load history from file
+    std::string line;
+    std::ifstream historyFile ("history.txt");
+    while(std::getline(historyFile, line)){
+        history.push_back(line);
+    }
+
     // Welcome message
     printf("Welcome to OSShell! Please enter your commands ('exit' to quit).\n");
 
@@ -34,46 +42,68 @@ int main (int argc, char **argv)
 
         std::getline(std::cin, command); //putting user input into string commmand
 
-        if(command[0] == NULL || command[0] == ' '){ //check if only enter or space was submitted for command, do nothing
+        if(command[0] == 0 || command[0] == ' '){ //check if only enter or space was submitted for command, do nothing
 
         }else{ //other commands besides only enter
             splitString(command, ' ', command_list); //splitting command on the space character
             vectorOfStringsToArrayOfCharArrays(command_list, &command_list_exec);
             
             if(strcmp(command_list_exec[0], "exit") == 0){ //user enters the command 'exit', quit the program
-              
-               break; 
+                history.push_back(command); //push history to list
+                //check if history has > 128 commands
+                if(history.size() == 129){
+                    history.erase(history.begin());
+                }
+                std::cout << std::endl; //print newline at end because the tests had this
+            
+                break; 
 
             }else if(strcmp(command_list_exec[0], "history") == 0){ //user enters 'history', print command history
                
                 if(command_list_exec[1] == NULL){ //if nothing after "history", just print history list
 
                     for(int i = 0; i < history.size(); i++){ 
-                        std::cout << "   " << i+1 <<": " <<history.at(i) << "\n";
+                        std::cout << "  " << i+1 <<": " <<history.at(i) << "\n";
                     }  
                     history.push_back(command); //push history to list
+                    //check if history has > 128 commands
+                    if(history.size() == 129){
+                        history.erase(history.begin());
+                    }
 
                 }else if(strcmp(command_list_exec[1], "clear") == 0){ //if command is history clear, clear the list
                     
                     history.clear(); //push history to list
 
-                }else if(allNums(command_list_exec[1]) > 0){ //check if number after "history is greater than 0"
+                }else if(allNums(command_list_exec[1]) > 0 && allNums(command_list_exec[1]) <= history.size()){ //check if number after "history is greater than 0"
            
                     int spot = history.size() - allNums(command_list_exec[1]); //finds starting spot in list
 
                     for(int i = spot; i < history.size(); i++){ 
-                        std::cout << "   " << i+1 <<": " <<history.at(i) << "\n";
+                        std::cout << "  " << i+1 <<": " <<history.at(i) << "\n";
                     }
 
                     history.push_back(command); //push history to list
+                    //check if history has > 128 commands
+                    if(history.size() == 129){
+                        history.erase(history.begin());
+                    }
 
                 }else{ //all else prints the error
                     history.push_back(command); //push history to list
+                    //check if history has > 128 commands
+                    if(history.size() == 129){
+                        history.erase(history.begin());
+                    }
                     std::cout << "Error: history expects an integer > 0 (or 'clear')\n";
                 } 
 
             }else if(command_list_exec[0][0] == dot || command_list_exec[0][0] == slash){//user inputs . or / check if command is a path
                 history.push_back(command);
+                //check if history has > 128 commands
+                if(history.size() == 129){
+                    history.erase(history.begin());
+                }
 
                 if(stat(command.c_str(), &buf) == 0 && buf.st_mode & S_IXUSR){
                     //executable found
@@ -93,6 +123,10 @@ int main (int argc, char **argv)
                 int j = 0;
                 bool commandFound = false;
                 history.push_back(command);
+                //check if history has > 128 commands
+                if(history.size() == 129){
+                    history.erase(history.begin());
+                }
 
                 for(j = 0; j < os_path_list.size(); j++) {
                     std::string pathString = os_path_list[j];
@@ -123,6 +157,11 @@ int main (int argc, char **argv)
 
         }
     }
+
+    //writing history back to file
+    std::ofstream historyFile1("history.txt");
+    for(std::string& line : history ) historyFile1 << line << '\n' ;
+
     return 0;
 }
 
